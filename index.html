@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="mt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verb tal-Jum</title>
+    <style>
+        :root { --nyt-black: #121213; --nyt-gray: #787c7e; --correct: #6aaa64; --error: #e76f51; }
+        body { font-family: 'Georgia', serif; background: #fff; color: var(--nyt-black); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .container { max-width: 450px; width: 100%; border-top: 3px solid var(--nyt-black); padding-top: 10px; }
+        
+        /* Mobile stats and date */
+        .header-meta { display: flex; justify-content: space-between; font-family: sans-serif; font-size: 0.75rem; text-transform: uppercase; color: var(--nyt-gray); margin-bottom: 15px; }
+        
+        .mamma-box { background: #fdfdfd; padding: 25px 15px; text-align: center; border: 1px solid #f0f0f0; margin-bottom: 20px; border-radius: 4px; }
+        .root-text { font-family: sans-serif; font-weight: bold; letter-spacing: 4px; color: var(--nyt-gray); font-size: 0.8rem; margin-bottom: 8px; }
+        .mamma-word { font-size: 2.4rem; font-weight: bold; margin: 5px 0; }
+        .translation { font-style: italic; color: #555; font-size: 1.1rem; }
+
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-family: sans-serif; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; color: #333; }
+        input { width: 100%; padding: 14px; font-size: 1.1rem; border: 2px solid #e5e5e5; border-radius: 8px; box-sizing: border-box; -webkit-appearance: none; }
+        input:focus { border-color: var(--nyt-black); outline: none; background: #fafafa; }
+
+        .button-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        button { width: 100%; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-family: sans-serif; }
+        .btn-check { background: var(--nyt-black); color: white; }
+        .btn-reveal { background: #eee; color: #444; }
+        
+        #result { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; display: none; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-meta">
+        <span id="dateHeader"></span>
+        <span>Maltese Verb Trainer</span>
+    </div>
+
+    <div class="mamma-box">
+        <div class="root-text" id="rootDisplay"></div>
+        <div class="mamma-word" id="mammaDisplay"></div>
+        <div class="translation" id="englishDisplay"></div>
+    </div>
+
+    <div class="input-group">
+        <label id="pastLabel"></label>
+        <input type="text" id="pastInput" spellcheck="false" autocomplete="off">
+    </div>
+
+    <div class="input-group">
+        <label id="presentLabel"></label>
+        <input type="text" id="presentInput" spellcheck="false" autocomplete="off">
+    </div>
+
+    <div class="input-group">
+        <label id="suffixLabel"></label>
+        <input type="text" id="suffixInput" spellcheck="false" autocomplete="off">
+    </div>
+
+    <div class="button-stack">
+        <button class="btn-check" onclick="check()">CHECK ANSWERS</button>
+        <button class="btn-reveal" onclick="reveal()">REVEAL ANSWERS</button>
+    </div>
+
+    <div id="result"></div>
+</div>
+
+<script>
+    const verbs = [
+        { root: "Ħ-S-L", mamma: "Ħasel", english: "to wash", past: {q: "I washed", a: "ħsilt"}, pres: {q: "I wash", a: "naħsel"}, suff: {q: "Wash me!", a: "aħsilni"} },
+        { root: "K-T-B", mamma: "Kiteb", english: "to write", past: {q: "I wrote", a: "ktibt"}, pres: {q: "I write", a: "nikteb"}, suff: {q: "Write to him!", a: "iktiblu"} },
+        { root: "Q-R-A", mamma: "Qara", english: "to read", past: {q: "I read (past)", a: "qrajt"}, pres: {q: "She reads", a: "taqra"}, suff: {q: "Read it (f)!", a: "aqraha"} },
+        { root: "GĦ-L-M", mamma: "Għallem", english: "to teach", past: {q: "We taught", a: "għallimna"}, pres: {q: "You teach", a: "tgħallem"}, suff: {q: "Teach us!", a: "għallimna"} },
+        { root: "X-R-I", mamma: "Xtara", english: "to buy", past: {q: "I bought", a: "xtrajt"}, pres: {q: "I buy", a: "nixtri"}, suff: {q: "Buy it (m)!", a: "xtrih"} },
+        { root: "F-T-Ħ", mamma: "Fetaħ", english: "to open", past: {q: "They opened", a: "fetħu"}, pres: {q: "He opens", a: "jiftaħ"}, suff: {q: "Open it (m)!", a: "ifthu"} },
+        { root: "GĦ-T-I", mamma: "Għata", english: "to give", past: {q: "He gave", a: "għata"}, pres: {q: "I give", a: "nagħti"}, suff: {q: "Give it to me!", a: "atini"} },
+        { root: "R-M-I", mamma: "Rema", english: "to throw", past: {q: "We threw", a: "rmejna"}, pres: {q: "You throw", a: "tarmi"}, suff: {q: "Throw it (m) away!", a: "armih"} },
+        { root: "Ħ-O-D", mamma: "Ħa", english: "to take", past: {q: "I took", a: "ħadt"}, pres: {q: "He takes", a: "jieħu"}, suff: {q: "Take it (f)!", a: "ħudha"} },
+        { root: "GĦ-I-D", mamma: "Għid", english: "to say/tell", past: {q: "You said", a: "għidt"}, pres: {q: "I say", a: "ngħid"}, suff: {q: "Tell her!", a: "għidilha"} },
+        { root: "S-I-B", mamma: "Sab", english: "to find", past: {q: "They found", a: "sabu"}, pres: {q: "We find", a: "nsibu"}, suff: {q: "Find it (m)!", a: "sibuh"} },
+        { root: "W-R-I", mamma: "Wera", english: "to show", past: {q: "I showed", a: "wrejt"}, pres: {q: "He shows", a: "juri"}, suff: {q: "Show me!", a: "urini"} },
+        { root: "B-GĦ-T", mamma: "Bagħat", english: "to send", past: {q: "We sent", a: "bgħatna"}, pres: {q: "They send", a: "jibagħtu"}, suff: {q: "Send it (m)!", a: "ibagħtu"} },
+        { root: "K-I-L", mamma: "Kiel", english: "to eat", past: {q: "I ate", a: "kilt"}, pres: {q: "We eat", a: "nieklu"}, suff: {q: "Eat it (f)!", a: "kilha"} },
+        { root: "D-Ħ-L", mamma: "Daħal", english: "to enter", past: {q: "They entered", a: "daħlu"}, pres: {q: "I enter", a: "nidħol"}, suff: {q: "Put it (m) in!", a: "daħħlu"} }
+    ];
+
+    const start = new Date(new Date().getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((new Date() - start) / 86400000);
+    const verb = verbs[dayOfYear % verbs.length];
+
+    document.getElementById('dateHeader').innerText = new Date().toLocaleDateString('en-MT', { day: 'numeric', month: 'short' });
+    document.getElementById('rootDisplay').innerText = `ROOT: ${verb.root}`;
+    document.getElementById('mammaDisplay').innerText = verb.mamma;
+    document.getElementById('englishDisplay').innerText = verb.english;
+    document.getElementById('pastLabel').innerText = verb.past.q;
+    document.getElementById('presentLabel').innerText = verb.pres.q;
+    document.getElementById('suffixLabel').innerText = verb.suff.q;
+
+    function check() {
+        const p = document.getElementById('pastInput').value.trim().toLowerCase();
+        const pr = document.getElementById('presentInput').value.trim().toLowerCase();
+        const s = document.getElementById('suffixInput').value.trim().toLowerCase();
+        const res = document.getElementById('result');
+
+        res.style.display = "block";
+        if(p === verb.past.a && pr === verb.pres.a && s === verb.suff.a) {
+            res.style.background = "#e6f4ea";
+            res.style.color = "#2a5d34";
+            res.innerText = "Prosit! Correct.";
+        } else {
+            res.style.background = "#fce8e6";
+            res.style.color = "#a52a2a";
+            res.innerText = "Try again!";
+        }
+    }
+
+    function reveal() {
+        const res = document.getElementById('result');
+        res.style.display = "block";
+        res.style.background = "#f4f4f4";
+        res.style.color = "#333";
+        res.innerHTML = `<div style="text-align:left; font-family:sans-serif; font-size:0.9rem;">
+            <b>Answers:</b><br>
+            Past: ${verb.past.a}<br>
+            Present: ${verb.pres.a}<br>
+            Suffix: ${verb.suff.a}
+        </div>`;
+    }
+</script>
+</body>
+</html>
