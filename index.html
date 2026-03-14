@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="mt">
+<head>
+    <meta charset="UTF-8">
+    <title>Maltese Verb Trainer</title>
+    <style>
+        body { font-family: 'Georgia', serif; background: #fff; color: #121213; display: flex; justify-content: center; padding: 20px; }
+        .container { max-width: 500px; width: 100%; border-top: 2px solid #000; padding-top: 20px; }
+        .mamma-box { background: #f8f8f8; padding: 20px; text-align: center; border: 1px solid #eee; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0 20px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #121213; color: white; border: none; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 id="dateHeader"></h2>
+    <div class="mamma-box">
+        <div id="rootDisplay" style="font-weight:bold; letter-spacing: 3px;"></div>
+        <div id="mammaDisplay" style="font-size: 2rem;"></div>
+        <div id="englishDisplay" style="font-style:italic;"></div>
+    </div>
+    <label id="pastLabel"></label><input type="text" id="pastInput">
+    <label id="presentLabel"></label><input type="text" id="presentInput">
+    <label id="suffixLabel"></label><input type="text" id="suffixInput">
+    <button onclick="check()">CHECK ANSWERS</button>
+    <div id="result" style="margin-top:20px; font-weight:bold;"></div>
+</div>
+
+<script>
+    const verbs = [
+        { root: "Ħ-S-L", mamma: "Ħasel", english: "to wash", past: {q: "I washed", a: "ħsilt"}, pres: {q: "I wash", a: "naħsel"}, suff: {q: "Wash me!", a: "aħsilni"} },
+        { root: "K-T-B", mamma: "Kiteb", english: "to write", past: {q: "I wrote", a: "ktibt"}, pres: {q: "I write", a: "nikteb"}, suff: {q: "Write to him!", a: "iktiblu"} },
+        { root: "Q-R-A", mamma: "Qara", english: "to read", past: {q: "I read (past)", a: "qrajt"}, pres: {q: "She reads", a: "taqra"}, suff: {q: "Read it!", a: "aqraha"} },
+        { root: "GĦ-L-M", mamma: "Għallem", english: "to teach", past: {q: "We taught", a: "għallimna"}, pres: {q: "You teach", a: "tgħallem"}, suff: {q: "Teach us!", a: "għallimna"} }
+        // Add more verbs here...
+    ];
+
+    // Select verb based on today's day of the year
+    const start = new Date(new Date().getFullYear(), 0, 0);
+    const diff = new Date() - start;
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const verb = verbs[dayOfYear % verbs.length];
+
+    document.getElementById('dateHeader').innerText = new Date().toDateString();
+    document.getElementById('rootDisplay').innerText = `ROOT: ${verb.root}`;
+    document.getElementById('mammaDisplay').innerText = verb.mamma;
+    document.getElementById('englishDisplay').innerText = verb.english;
+    document.getElementById('pastLabel').innerText = verb.past.q;
+    document.getElementById('presentLabel').innerText = verb.pres.q;
+    document.getElementById('suffixLabel').innerText = verb.suff.q;
+
+    function check() {
+        if(document.getElementById('pastInput').value.trim() === verb.past.a &&
+           document.getElementById('presentInput').value.trim() === verb.pres.a &&
+           document.getElementById('suffixInput').value.trim() === verb.suff.a) {
+            document.getElementById('result').style.color = "green";
+            document.getElementById('result').innerText = "Prosit! Correct.";
+        } else {
+            document.getElementById('result').style.color = "red";
+            document.getElementById('result').innerText = "Try again!";
+        }
+    }
+</script>
+</body>
+</html>
