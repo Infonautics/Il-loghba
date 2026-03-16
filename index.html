@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verb tal-Jum</title>
+    <title>Malti tal-Jum | Daily Quiz</title>
     <style>
-        :root { --nyt-black: #121213; --nyt-gray: #787c7e; --correct: #6aaa64; --error: #e76f51; }
-        body { font-family: 'Georgia', serif; background: #fff; color: var(--nyt-black); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        :root { --nyt-black: #121213; --nyt-gray: #787c7e; --correct: #6aaa64; --error: #e76f51; --bg: #ffffff; }
+        body { font-family: 'Georgia', serif; background: var(--bg); color: var(--nyt-black); margin: 0; padding: 15px; display: flex; justify-content: center; }
         .container { max-width: 450px; width: 100%; border-top: 3px solid var(--nyt-black); padding-top: 10px; }
         
         .header-meta { display: flex; justify-content: space-between; font-family: sans-serif; font-size: 0.75rem; text-transform: uppercase; color: var(--nyt-gray); margin-bottom: 15px; align-items: center; }
         .streak-badge { background: #f0f0f0; padding: 4px 8px; border-radius: 12px; color: #333; font-weight: bold; }
         
-        .mamma-box { background: #fdfdfd; padding: 25px 15px; text-align: center; border: 1px solid #f0f0f0; margin-bottom: 20px; border-radius: 4px; }
-        .root-text { font-family: sans-serif; font-weight: bold; letter-spacing: 4px; color: var(--nyt-gray); font-size: 0.8rem; margin-bottom: 8px; }
-        .mamma-word { font-size: 2.4rem; font-weight: bold; margin: 5px 0; }
-        .translation { font-style: italic; color: #555; font-size: 1.1rem; }
+        .quiz-header { background: #fdfdfd; padding: 20px 15px; text-align: center; border: 1px solid #f0f0f0; margin-bottom: 20px; border-radius: 4px; }
+        .quiz-title { font-family: sans-serif; font-weight: bold; letter-spacing: 2px; color: var(--nyt-gray); font-size: 0.8rem; margin-bottom: 5px; }
+        .quiz-topic { font-size: 1.8rem; font-weight: bold; margin: 0; }
 
         .input-group { margin-bottom: 18px; }
-        label { display: block; font-family: sans-serif; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; color: #333; }
-        input { width: 100%; padding: 14px; font-size: 1.1rem; border: 2px solid #e5e5e5; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.2s; }
+        label { display: block; font-family: sans-serif; font-size: 0.85rem; font-weight: bold; margin-bottom: 6px; color: #333; }
+        input { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #e5e5e5; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--nyt-black); background: #fafafa; }
-        input.correct { border-color: var(--correct); background: #f6fff6; }
+        input.correct { border-color: var(--correct); background: #f6fff6; color: #2a5d34; font-weight: bold; }
 
         .button-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         button { width: 100%; padding: 16px; font-size: 1rem; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; font-family: sans-serif; transition: 0.2s; }
@@ -36,55 +35,57 @@
 <div class="container">
     <div class="header-meta">
         <span id="dateHeader"></span>
-        <span class="streak-badge">🔥 <span id="streakCount">0</span> Day Streak</span>
+        <span class="streak-badge">🔥 <span id="streakCount">0</span> Jum</span>
     </div>
 
-    <div class="mamma-box">
-        <div class="root-text" id="rootDisplay"></div>
-        <div class="mamma-word" id="mammaDisplay"></div>
-        <div class="translation" id="englishDisplay"></div>
+    <div class="quiz-header">
+        <div class="quiz-title">PROVA TAL-GRAMMATIKA</div>
+        <div class="quiz-topic" id="topicDisplay"></div>
     </div>
 
-    <div class="input-group"><label id="pastL"></label><input type="text" id="pastI" spellcheck="false" autocomplete="off"></div>
-    <div class="input-group"><label id="presL"></label><input type="text" id="presI" spellcheck="false" autocomplete="off"></div>
-    <div class="input-group"><label id="suffL"></label><input type="text" id="suffI" spellcheck="false" autocomplete="off"></div>
-    <div class="input-group"><label id="partL"></label><input type="text" id="partI" spellcheck="false" autocomplete="off"></div>
-    <div class="input-group"><label id="nounL"></label><input type="text" id="nounI" spellcheck="false" autocomplete="off"></div>
+    <div id="quizContainer"></div>
 
     <div class="button-stack">
-        <button class="btn-check" id="checkBtn" onclick="check()">CHECK ANSWERS</button>
-        <button class="btn-reveal" id="revealBtn" onclick="reveal()">REVEAL ANSWERS</button>
-        <button class="btn-share" id="shareBtn" onclick="shareResults()">SHARE RESULTS</button>
+        <button class="btn-check" id="checkBtn" onclick="check()">IĊĊEKKJA</button>
+        <button class="btn-reveal" id="revealBtn" onclick="reveal()">URI T-TWEĠIBIET</button>
+        <button class="btn-share" id="shareBtn" onclick="shareResults()">IXXAQQAM IR-RIŻULTATI</button>
     </div>
 
     <div id="result"></div>
 </div>
 
 <script>
-    const verbs = [
-        { 
-            root: "Ħ-S-L", mamma: "Ħasel", english: "to wash", 
-            past: {q: "I washed", a: "ħsilt"}, 
-            pres: {q: "I wash", a: "naħsel"}, 
-            suff: {q: "Wash me!", a: "aħsilni"},
-            part: {q: "Washed (Participle)", a: "maħsul"},
-            noun: {q: "Washing (Verbal Noun)", a: "ħasil"}
+    // 5 Questions per day. You can add as many daily objects as you like.
+    const quizzes = [
+        {
+            topic: "Il-Verbi (Wash)",
+            questions: [
+                { q: "I washed (Maltese)", a: "ħsilt" },
+                { q: "She washes", a: "taħsel" },
+                { q: "We will wash", a: "naħslu" },
+                { q: "Wash it! (m)", a: "ħaslu" },
+                { q: "Wash me!", a: "aħsilni" }
+            ]
         },
-        { 
-            root: "K-T-B", mamma: "Kiteb", english: "to write", 
-            past: {q: "I wrote", a: "ktibt"}, 
-            pres: {q: "I write", a: "nikteb"}, 
-            suff: {q: "Write to him!", a: "iktiblu"},
-            part: {q: "Written (Participle)", a: "miktub"},
-            noun: {q: "Writing (Verbal Noun)", a: "kitba"}
+        {
+            topic: "L-Artiklu (The)",
+            questions: [
+                { q: "The table (mejda)", a: "il-mejda" },
+                { q: "The sun (xemx)", a: "ix-xemx" },
+                { q: "The child (tifel)", a: "it-tifel" },
+                { q: "The oil (żejt)", a: "iż-żejt" },
+                { q: "The box (kaxxa)", a: "il-kaxxa" }
+            ]
         },
-        { 
-            root: "F-T-Ħ", mamma: "Fetaħ", english: "to open", 
-            past: {q: "They opened", a: "fetħu"}, 
-            pres: {q: "He opens", a: "jiftaħ"}, 
-            suff: {q: "Open it (m)!", a: "ifthu"},
-            part: {q: "Opened (Participle)", a: "miftuħ"},
-            noun: {q: "Opening (Verbal Noun)", a: "ftuħ"}
+        {
+            topic: "Plural (Broken)",
+            questions: [
+                { q: "Dar (House) ->", a: "djar" },
+                { q: "Tifel (Boy) ->", a: "tfal" },
+                { q: "Kelb (Dog) ->", a: "klieb" },
+                { q: "Ktieb (Book) ->", a: "kotba" },
+                { q: "Siġġu (Chair) ->", a: "siġġijiet" }
+            ]
         }
     ];
 
@@ -92,9 +93,12 @@
     const start = new Date(today.getFullYear(), 0, 0);
     const dayOfYear = Math.floor((today - start) / 86400000);
     const dateKey = today.toLocaleDateString('en-MT');
-    const verb = verbs[dayOfYear % verbs.length];
+    
+    // Select quiz based on day
+    const dailyQuiz = quizzes[dayOfYear % quizzes.length];
 
-    let stats = JSON.parse(localStorage.getItem('malteseStats')) || { streak: 0, lastDate: "", wonToday: false };
+    // Stats Management
+    let stats = JSON.parse(localStorage.getItem('malteseGrammarStats')) || { streak: 0, lastDate: "", wonToday: false };
 
     if (stats.lastDate !== dateKey) {
         stats.wonToday = false;
@@ -105,35 +109,46 @@
         }
     }
 
-    document.getElementById('dateHeader').innerText = today.toLocaleDateString('en-MT', { day: 'numeric', month: 'short' });
+    // UI Initialization
+    document.getElementById('dateHeader').innerText = today.toLocaleDateString('en-MT', { day: 'numeric', month: 'short', year: 'numeric' });
     document.getElementById('streakCount').innerText = stats.streak;
-    document.getElementById('rootDisplay').innerText = `ROOT: ${verb.root}`;
-    document.getElementById('mammaDisplay').innerText = verb.mamma;
-    document.getElementById('englishDisplay').innerText = verb.english;
-    
-    document.getElementById('pastL').innerText = verb.past.q;
-    document.getElementById('presL').innerText = verb.pres.q;
-    document.getElementById('suffL').innerText = verb.suff.q;
-    document.getElementById('partL').innerText = verb.part.q;
-    document.getElementById('nounL').innerText = verb.noun.q;
+    document.getElementById('topicDisplay').innerText = dailyQuiz.topic;
 
-    if (stats.wonToday) { lockGame(); }
+    const quizContainer = document.getElementById('quizContainer');
+    dailyQuiz.questions.forEach((item, index) => {
+        const group = document.createElement('div');
+        group.className = 'input-group';
+        group.innerHTML = `
+            <label>${index + 1}. ${item.q}</label>
+            <input type="text" class="quiz-input" id="q${index}" spellcheck="false" autocomplete="off">
+        `;
+        quizContainer.appendChild(group);
+    });
+
+    if (stats.wonToday) lockGame();
 
     function check() {
-        const p = document.getElementById('pastI').value.trim().toLowerCase();
-        const pr = document.getElementById('presI').value.trim().toLowerCase();
-        const s = document.getElementById('suffI').value.trim().toLowerCase();
-        const pa = document.getElementById('partI').value.trim().toLowerCase();
-        const n = document.getElementById('nounI').value.trim().toLowerCase();
-        const res = document.getElementById('result');
+        const inputs = document.querySelectorAll('.quiz-input');
+        let allCorrect = true;
+        
+        inputs.forEach((input, i) => {
+            if (input.value.trim().toLowerCase() === dailyQuiz.questions[i].a.toLowerCase()) {
+                input.classList.add('correct');
+            } else {
+                input.classList.remove('correct');
+                allCorrect = false;
+            }
+        });
 
-        if(p === verb.past.a && pr === verb.pres.a && s === verb.suff.a && pa === verb.part.a && n === verb.noun.a) {
+        const res = document.getElementById('result');
+        res.style.display = "block";
+
+        if (allCorrect) {
             handleWin();
         } else {
-            res.style.display = "block";
             res.style.background = "#fce8e6";
             res.style.color = "#a52a2a";
-            res.innerText = "Check your spelling and try again!";
+            res.innerText = "Xi tweġibiet mhumiex tajbin. Erġa' pprova!";
         }
     }
 
@@ -142,26 +157,22 @@
             stats.streak++;
             stats.wonToday = true;
             stats.lastDate = dateKey;
-            localStorage.setItem('malteseStats', JSON.stringify(stats));
+            localStorage.setItem('malteseGrammarStats', JSON.stringify(stats));
         }
         document.getElementById('streakCount').innerText = stats.streak;
         const res = document.getElementById('result');
-        res.style.display = "block";
         res.style.background = "#e6f4ea";
         res.style.color = "#2a5d34";
-        res.innerText = "Prosit! You finished today's quiz.";
+        res.innerText = "Prosit! Kollox sew għal-lum.";
         lockGame();
     }
 
     function lockGame() {
-        document.getElementById('pastI').value = verb.past.a;
-        document.getElementById('presI').value = verb.pres.a;
-        document.getElementById('suffI').value = verb.suff.a;
-        document.getElementById('partI').value = verb.part.a;
-        document.getElementById('nounI').value = verb.noun.a;
-        document.querySelectorAll('input').forEach(i => {
-            i.disabled = true;
-            i.classList.add('correct');
+        const inputs = document.querySelectorAll('.quiz-input');
+        inputs.forEach((input, i) => {
+            input.value = dailyQuiz.questions[i].a;
+            input.disabled = true;
+            input.classList.add('correct');
         });
         document.getElementById('checkBtn').style.display = "none";
         document.getElementById('revealBtn').style.display = "none";
@@ -169,12 +180,19 @@
     }
 
     function reveal() {
-        alert(`Answers:\nPast: ${verb.past.a}\nPresent: ${verb.pres.a}\nSuffix: ${verb.suff.a}\nParticiple: ${verb.part.a}\nNoun: ${verb.noun.a}`);
+        const res = document.getElementById('result');
+        res.style.display = "block";
+        res.style.background = "#f4f4f4";
+        res.style.color = "#333";
+        res.innerHTML = "<b>Tweġibiet:</b> " + dailyQuiz.questions.map(q => q.a).join(', ');
     }
 
     function shareResults() {
-        const text = `Verb tal-Jum (${dateKey})\n🔥 Streak: ${stats.streak}\n5/5 Correct! 🇲🇹`;
-        navigator.clipboard.writeText(text).then(() => alert("Results copied!"));
+        const score = "✅✅✅✅✅";
+        const text = `Malti tal-Jum (${dateKey})\nGrammatika: ${dailyQuiz.topic}\n${score}\n🔥 Streak: ${stats.streak} jum\n#Malti #Maltese`;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Ir-riżultati ġew ikkupjati!");
+        });
     }
 </script>
 </body>
